@@ -1,0 +1,27 @@
+* After rebooting kali *
+
+sudo ip addr flush dev eth0
+sudo ip addr add 192.168.10.10/24 dev eth0
+sudo ip link set eth0 up
+
+sudo ip route del default
+sudo ip route add default via 192.168.191.2 dev eth1
+
+-------------------------------------------------
+
+* After rebooting ubuntu *
+
+sudo ip addr flush dev ens34
+sudo ip addr add 192.168.20.20/24 dev ens34
+sudo ip link set ens34 up
+sudo ip route add default via 192.168.20.1
+
+------------------------------------------------
+
+* After rebooting fedora *
+* AI-IDS *
+
+source ~/AI-IDS/.venv/bin/activate
+
+cd ~/AI-IDS
+python3 backendV2.py

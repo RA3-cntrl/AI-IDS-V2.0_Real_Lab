@@ -1,0 +1,130 @@
+═══════════════════════════════════════════════════════
+  FEDORADASH — AI-IDS REBOOT GUIDE  (V2.0 — Real Lab)
+  Network Topology (flat 192.168.2.0/24 via switch):
+    Kali attacker   : 192.168.2.30    (eth0, VMware bridged)
+    Fedora sensor   : 192.168.2.20    (ens224, PROMISC)
+                      DHCP            (ens160, NAT/internet)
+    Windows victim  : 192.168.2.223   (physical PC)
+    OPNsense GW     : 192.168.2.1     (physical PC + switch)
+  NOTE: Fedora is a PURE SENSOR — not a router.
+═══════════════════════════════════════════════════════
+
+
+STEP 1 — FEDORA SENSOR (always do this first)
+──────────────────────────────────────────────
+
+Re-enable promiscuous mode on the lab NIC:
+
+    sudo ip link set ens224 promisc on
+
+Verify lab connectivity:
+
+    ping -c 2 192.168.2.1      # OPNsense gateway
+    ping -c 2 192.168.2.223    # Windows victim
+
+Open Terminal 1 — Start the backend:
+
+    source ~/AI-IDS/.venv/bin/activate
+    cd ~/AI-IDS
+    python3 backendV2_fedora.py
+
+Open Terminal 2 — Start Zeek (sniff on ens224):
+
+    cd /var/log/zeek
+    sudo zeek -i ens224
+
+Open browser:
+
+    http://localhost:5050
+    Login: admin / fedora1337
+
+═══════════════════════════════════════════════════════
+
+
+STEP 2 — KALI ATTACKER (VMware VM on Fedora)
+──────────────────────────────────────────────
+
+Re-assign lab IP on the bridged NIC (eth0):
+
+    sudo ip addr add 192.168.2.30/24 dev eth0
+    sudo ip link set eth0 up
+    sudo ip route add 192.168.2.0/24 dev eth0
+
+Verify connectivity:
+
+    ping -c 2 192.168.2.1      # OPNsense
+    ping -c 2 192.168.2.223    # Windows victim
+    ping -c 2 192.168.2.20     # Fedora sensor
+
+═══════════════════════════════════════════════════════
+
+
+STEP 3 — WINDOWS VICTIM (physical PC)
+───────────────────────────────────────
+
+Windows keeps its static IP (192.168.2.223) across reboots.
+No action needed unless manually changed.
+
+Verify from victim:
+
+    ping 192.168.2.1            # OPNsense
+    ping 192.168.2.20           # Fedora sensor
+
+═══════════════════════════════════════════════════════
+
+
+STEP 4 — TEST DETECTION (from Kali)
+─────────────────────────────────────
+
+Run attacks toward the Windows victim:
+
+    # Port scan
+    nmap -sS 192.168.2.223
+    nmap -A -T4 192.168.2.223
+
+    # Service version scan
+    nmap -sV -p 1-1000 192.168.2.223
+
+    # SYN flood DoS test
+    sudo hping3 -S --flood -p 80 192.168.2.223
+
+    # ICMP flood
+    sudo hping3 --icmp --flood 192.168.2.223
+
+    # RDP brute force (if RDP is open on victim)
+    hydra -l administrator -P /usr/share/wordlists/rockyou.txt rdp://192.168.2.223
+
+Watch FedoraDash dashboard for alerts at http://localhost:5050
+
+═══════════════════════════════════════════════════════
+
+
+STEP 5 — OPNSENSE AUTO-BLOCK (optional)
+─────────────────────────────────────────
+
+Before starting backend, export these env vars:
+
+    export OPNSENSE_HOST="https://192.168.2.1"
+    export OPNSENSE_API_KEY="your-key"
+    export OPNSENSE_API_SEC="your-secret"
+
+The IDS will auto-block attacker IPs in OPNsense
+when attack confidence >= 90%.
+
+The alias "IDS_Blocklist" must already exist in
+OPNsense → Firewall → Aliases before using this.
+
+═══════════════════════════════════════════════════════
+
+
+NOTES
+──────
+- Promisc mode on ens224 does NOT survive reboot — always re-run Step 1 command
+- Kali IP 192.168.2.30 does NOT survive reboot — always re-run Step 2 commands
+- Internet on Fedora is via ens160 (VMware NAT DHCP) — survives reboot
+- Internet on Kali is via eth1 (VMware NAT DHCP) — survives reboot
+- Python venv is at ~/AI-IDS/.venv
+- Zeek binary is at /usr/bin/zeek
+- Zeek logs to /var/log/zeek/conn.log
+
+═══════════════════════════════════════════════════════
