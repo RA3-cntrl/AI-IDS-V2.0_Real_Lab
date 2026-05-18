@@ -1,0 +1,573 @@
+=========================================
+   MANUAL ENTRIES FOR IDS LABEL TOOL
+   Run: python3 label_and_retrain.py
+   Choose Mode 2 each time
+=========================================
+
+
+═════════════════════════════════════════
+  DEFENSE EVASION — 30 ENTRIES
+  Label to pick: [3] Defense Evasion
+═════════════════════════════════════════
+
+--- Entry 1 ---
+Protocol:         tcp
+Port:             4444
+Duration:         45.5
+Bytes sent:       8500
+Bytes received:   12000
+Packets sent:     120
+Packets received: 140
+Conn state:       SF
+History:          ShADad
+
+--- Entry 2 ---
+Protocol:         tcp
+Port:             21
+Duration:         5.2
+Bytes sent:       1200
+Bytes received:   800
+Packets sent:     18
+Packets received: 15
+Conn state:       SF
+History:          ShADad
+
+--- Entry 3 ---
+Protocol:         tcp
+Port:             4445
+Duration:         60.1
+Bytes sent:       9200
+Bytes received:   13500
+Packets sent:     135
+Packets received: 155
+Conn state:       SF
+History:          ShADad
+
+--- Entry 4 ---
+Protocol:         tcp
+Port:             1234
+Duration:         30.7
+Bytes sent:       7000
+Bytes received:   9500
+Packets sent:     98
+Packets received: 110
+Conn state:       SF
+History:          ShADad
+
+--- Entry 5 ---
+Protocol:         tcp
+Port:             5555
+Duration:         22.3
+Bytes sent:       5500
+Bytes received:   8000
+Packets sent:     85
+Packets received: 95
+Conn state:       SF
+History:          ShADad
+
+--- Entry 6 ---
+Protocol:         tcp
+Port:             8443
+Duration:         75.0
+Bytes sent:       11000
+Bytes received:   15000
+Packets sent:     160
+Packets received: 180
+Conn state:       SF
+History:          ShADad
+
+--- Entry 7 ---
+Protocol:         tcp
+Port:             443
+Duration:         50.8
+Bytes sent:       9800
+Bytes received:   14200
+Packets sent:     145
+Packets received: 162
+Conn state:       SF
+History:          ShADad
+
+--- Entry 8 ---
+Protocol:         tcp
+Port:             6666
+Duration:         18.4
+Bytes sent:       4200
+Bytes received:   6100
+Packets sent:     72
+Packets received: 80
+Conn state:       SF
+History:          ShADad
+
+--- Entry 9 ---
+Protocol:         tcp
+Port:             9001
+Duration:         90.2
+Bytes sent:       14000
+Bytes received:   18500
+Packets sent:     200
+Packets received: 220
+Conn state:       SF
+History:          ShADad
+
+--- Entry 10 ---
+Protocol:         tcp
+Port:             2222
+Duration:         40.6
+Bytes sent:       8000
+Bytes received:   11000
+Packets sent:     115
+Packets received: 130
+Conn state:       SF
+History:          ShADad
+
+--- Entry 11 ---
+Protocol:         tcp
+Port:             3333
+Duration:         55.9
+Bytes sent:       10200
+Bytes received:   13800
+Packets sent:     148
+Packets received: 165
+Conn state:       SF
+History:          ShADad
+
+--- Entry 12 ---
+Protocol:         tcp
+Port:             7777
+Duration:         28.1
+Bytes sent:       6300
+Bytes received:   8700
+Packets sent:     92
+Packets received: 105
+Conn state:       SF
+History:          ShADad
+
+--- Entry 13 ---
+Protocol:         tcp
+Port:             8888
+Duration:         65.3
+Bytes sent:       10800
+Bytes received:   14600
+Packets sent:     155
+Packets received: 172
+Conn state:       SF
+History:          ShADad
+
+--- Entry 14 ---
+Protocol:         tcp
+Port:             1337
+Duration:         35.7
+Bytes sent:       7500
+Bytes received:   10200
+Packets sent:     108
+Packets received: 122
+Conn state:       SF
+History:          ShADad
+
+--- Entry 15 ---
+Protocol:         tcp
+Port:             21
+Duration:         8.9
+Bytes sent:       2100
+Bytes received:   1500
+Packets sent:     28
+Packets received: 22
+Conn state:       SF
+History:          ShADad
+
+--- Entry 16 ---
+Protocol:         tcp
+Port:             4444
+Duration:         120.0
+Bytes sent:       18000
+Bytes received:   24000
+Packets sent:     250
+Packets received: 280
+Conn state:       SF
+History:          ShADad
+
+--- Entry 17 ---
+Protocol:         tcp
+Port:             9999
+Duration:         42.5
+Bytes sent:       8200
+Bytes received:   11500
+Packets sent:     118
+Packets received: 133
+Conn state:       SF
+History:          ShADad
+
+--- Entry 18 ---
+Protocol:         tcp
+Port:             6000
+Duration:         15.3
+Bytes sent:       3800
+Bytes received:   5200
+Packets sent:     65
+Packets received: 73
+Conn state:       SF
+History:          ShADad
+
+--- Entry 19 ---
+Protocol:         tcp
+Port:             1080
+Duration:         52.6
+Bytes sent:       9600
+Bytes received:   13200
+Packets sent:     140
+Packets received: 158
+Conn state:       SF
+History:          ShADad
+
+--- Entry 20 ---
+Protocol:         tcp
+Port:             5900
+Duration:         80.4
+Bytes sent:       12500
+Bytes received:   17000
+Packets sent:     185
+Packets received: 205
+Conn state:       SF
+History:          ShADad
+
+--- Entry 21 ---
+Protocol:         tcp
+Port:             4446
+Duration:         33.8
+Bytes sent:       7200
+Bytes received:   9800
+Packets sent:     102
+Packets received: 115
+Conn state:       SF
+History:          ShADad
+
+--- Entry 22 ---
+Protocol:         tcp
+Port:             2100
+Duration:         58.2
+Bytes sent:       10500
+Bytes received:   14300
+Packets sent:     152
+Packets received: 170
+Conn state:       SF
+History:          ShADad
+
+--- Entry 23 ---
+Protocol:         tcp
+Port:             3000
+Duration:         25.7
+Bytes sent:       5800
+Bytes received:   7900
+Packets sent:     88
+Packets received: 100
+Conn state:       SF
+History:          ShADad
+
+--- Entry 24 ---
+Protocol:         tcp
+Port:             8080
+Duration:         70.1
+Bytes sent:       11500
+Bytes received:   15800
+Packets sent:     168
+Packets received: 188
+Conn state:       SF
+History:          ShADad
+
+--- Entry 25 ---
+Protocol:         tcp
+Port:             4447
+Duration:         38.4
+Bytes sent:       7800
+Bytes received:   10600
+Packets sent:     112
+Packets received: 126
+Conn state:       SF
+History:          ShADad
+
+--- Entry 26 ---
+Protocol:         tcp
+Port:             31337
+Duration:         48.9
+Bytes sent:       9000
+Bytes received:   12400
+Packets sent:     128
+Packets received: 145
+Conn state:       SF
+History:          ShADad
+
+--- Entry 27 ---
+Protocol:         tcp
+Port:             1111
+Duration:         62.7
+Bytes sent:       10600
+Bytes received:   14500
+Packets sent:     158
+Packets received: 176
+Conn state:       SF
+History:          ShADad
+
+--- Entry 28 ---
+Protocol:         tcp
+Port:             6667
+Duration:         20.5
+Bytes sent:       4800
+Bytes received:   6600
+Packets sent:     78
+Packets received: 88
+Conn state:       SF
+History:          ShADad
+
+--- Entry 29 ---
+Protocol:         tcp
+Port:             7000
+Duration:         85.3
+Bytes sent:       13200
+Bytes received:   18000
+Packets sent:     192
+Packets received: 215
+Conn state:       SF
+History:          ShADad
+
+--- Entry 30 ---
+Protocol:         tcp
+Port:             9090
+Duration:         44.2
+Bytes sent:       8600
+Bytes received:   11800
+Packets sent:     122
+Packets received: 138
+Conn state:       SF
+History:          ShADad
+
+
+═════════════════════════════════════════
+  RECONNAISSANCE — 20 ENTRIES
+  Label to pick: [1] Reconnaissance
+═════════════════════════════════════════
+
+--- Entry 1 ---
+Protocol:         tcp
+Port:             80
+Duration:         0.000001
+Bytes sent:       40
+Bytes received:   0
+Packets sent:     1
+Packets received: 0
+Conn state:       S0
+History:          S
+
+--- Entry 2 ---
+Protocol:         tcp
+Port:             443
+Duration:         0.000001
+Bytes sent:       40
+Bytes received:   0
+Packets sent:     1
+Packets received: 0
+Conn state:       S0
+History:          S
+
+--- Entry 3 ---
+Protocol:         tcp
+Port:             8080
+Duration:         0.000002
+Bytes sent:       40
+Bytes received:   0
+Packets sent:     1
+Packets received: 0
+Conn state:       S0
+History:          S
+
+--- Entry 4 ---
+Protocol:         tcp
+Port:             3306
+Duration:         0.000001
+Bytes sent:       40
+Bytes received:   0
+Packets sent:     1
+Packets received: 0
+Conn state:       S0
+History:          S
+
+--- Entry 5 ---
+Protocol:         tcp
+Port:             445
+Duration:         0.000003
+Bytes sent:       44
+Bytes received:   0
+Packets sent:     1
+Packets received: 0
+Conn state:       S0
+History:          S
+
+--- Entry 6 ---
+Protocol:         tcp
+Port:             21
+Duration:         0.000001
+Bytes sent:       40
+Bytes received:   0
+Packets sent:     1
+Packets received: 0
+Conn state:       REJ
+History:          Sr
+
+--- Entry 7 ---
+Protocol:         tcp
+Port:             25
+Duration:         0.000002
+Bytes sent:       40
+Bytes received:   0
+Packets sent:     1
+Packets received: 0
+Conn state:       S0
+History:          S
+
+--- Entry 8 ---
+Protocol:         tcp
+Port:             53
+Duration:         0.000001
+Bytes sent:       40
+Bytes received:   0
+Packets sent:     1
+Packets received: 0
+Conn state:       S0
+History:          S
+
+--- Entry 9 ---
+Protocol:         tcp
+Port:             8443
+Duration:         0.000002
+Bytes sent:       40
+Bytes received:   0
+Packets sent:     1
+Packets received: 0
+Conn state:       S0
+History:          S
+
+--- Entry 10 ---
+Protocol:         tcp
+Port:             3389
+Duration:         0.000001
+Bytes sent:       40
+Bytes received:   0
+Packets sent:     1
+Packets received: 0
+Conn state:       S0
+History:          S
+
+--- Entry 11 ---
+Protocol:         tcp
+Port:             139
+Duration:         0.000003
+Bytes sent:       44
+Bytes received:   0
+Packets sent:     1
+Packets received: 0
+Conn state:       REJ
+History:          Sr
+
+--- Entry 12 ---
+Protocol:         tcp
+Port:             110
+Duration:         0.000001
+Bytes sent:       40
+Bytes received:   0
+Packets sent:     1
+Packets received: 0
+Conn state:       S0
+History:          S
+
+--- Entry 13 ---
+Protocol:         tcp
+Port:             1433
+Duration:         0.000002
+Bytes sent:       40
+Bytes received:   0
+Packets sent:     1
+Packets received: 0
+Conn state:       S0
+History:          S
+
+--- Entry 14 ---
+Protocol:         tcp
+Port:             5432
+Duration:         0.000001
+Bytes sent:       40
+Bytes received:   0
+Packets sent:     1
+Packets received: 0
+Conn state:       S0
+History:          S
+
+--- Entry 15 ---
+Protocol:         tcp
+Port:             6379
+Duration:         0.000002
+Bytes sent:       40
+Bytes received:   0
+Packets sent:     1
+Packets received: 0
+Conn state:       S0
+History:          S
+
+--- Entry 16 ---
+Protocol:         tcp
+Port:             27017
+Duration:         0.000001
+Bytes sent:       40
+Bytes received:   0
+Packets sent:     1
+Packets received: 0
+Conn state:       S0
+History:          S
+
+--- Entry 17 ---
+Protocol:         udp
+Port:             161
+Duration:         0.000500
+Bytes sent:       60
+Bytes received:   0
+Packets sent:     1
+Packets received: 0
+Conn state:       S0
+History:          D
+
+--- Entry 18 ---
+Protocol:         tcp
+Port:             23
+Duration:         0.000001
+Bytes sent:       40
+Bytes received:   0
+Packets sent:     1
+Packets received: 0
+Conn state:       S0
+History:          S
+
+--- Entry 19 ---
+Protocol:         tcp
+Port:             9200
+Duration:         0.000002
+Bytes sent:       40
+Bytes received:   0
+Packets sent:     1
+Packets received: 0
+Conn state:       S0
+History:          S
+
+--- Entry 20 ---
+Protocol:         tcp
+Port:             2049
+Duration:         0.000001
+Bytes sent:       40
+Bytes received:   0
+Packets sent:     1
+Packets received: 0
+Conn state:       REJ
+History:          Sr
+
+=========================================
+  AFTER ADDING ALL ENTRIES:
+  The script will ask to retrain.
+  Say YES, then restart backend.py
+=========================================

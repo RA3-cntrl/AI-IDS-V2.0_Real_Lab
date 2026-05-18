@@ -1,0 +1,51 @@
+AI-IDS/IPS — Model Evaluation Report
+=======================================================
+
+MODEL 1 — Binary Classifier
+-------------------------------------------------------
+Accuracy  : 0.9675
+Precision : 0.8792
+Recall    : 0.9698
+F1 Score  : 0.9223
+
+Confusion Matrix:
+[[361374  12338]
+ [  2793  89758]]
+
+TN=361374  FP=12338  FN=2793  TP=89758
+
+              precision    recall  f1-score   support
+
+      Benign       0.99      0.97      0.98    373712
+      Attack       0.88      0.97      0.92     92551
+
+    accuracy                           0.97    466263
+   macro avg       0.94      0.97      0.95    466263
+weighted avg       0.97      0.97      0.97    466263
+
+Feature Importance:
+dest_port_zeek    0.484339
+orig_pkts         0.232601
+duration          0.210636
+resp_ip_bytes     0.018916
+proto             0.018033
+orig_ip_bytes     0.017866
+conn_state        0.009274
+history           0.008335
+
+MODEL 2 — Multi-class Classifier
+-------------------------------------------------------
+Accuracy  : 1.0000
+F1 Score  : 1.0000 (weighted)
+
+                   precision    recall  f1-score   support
+
+Credential Access       1.00      1.00      1.00      8699
+  Defense Evasion       0.98      1.00      0.99        65
+   Reconnaissance       1.00      1.00      1.00       582
+             none       1.00      1.00      1.00     83206
+
+         accuracy                           1.00     92552
+        macro avg       1.00      1.00      1.00     92552
+     weighted avg       1.00      1.00      1.00     92552
+
