@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SENTINEL — Network IDS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:        #03060f;
+  --bg2:       #070d1a;
+  --bg3:       #0a1220;
+  --panel:     #0d1825;
+  --border:    #0e2a3f;
+  --border2:   #1a3a55;
+  --cyan:      #00d4ff;
+  --cyan2:     #00a8cc;
+  --green:     #00ff88;
+  --green2:    #00cc6a;
+  --red:       #ff3366;
+  --red2:      #cc1a44;
+  --orange:    #ff8c00;
+  --yellow:    #ffd700;
+  --text:      #c8dde8;
+  --text2:     #6a8fa8;
+  --text3:     #3a5f7a;
+  --font-mono: 'Share Tech Mono', monospace;
+  --font-main: 'Rajdhani', sans-serif;
+  --font-head: 'Orbitron', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-main);
+  font-size: 14px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── SCANLINE OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,212,255,0.015) 2px,
+    rgba(0,212,255,0.015) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── HEADER ── */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 56px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border2);
+  position: sticky; top: 0; z-index: 100;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo-icon {
+  width: 32px; height: 32px;
+  border: 2px solid var(--cyan);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  animation: pulse-border 2s ease-in-out infinite;
+}
+@keyframes pulse-border {
+  0%,100% { border-color: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+  50%      { border-color: var(--cyan2); box-shadow: 0 0 20px var(--cyan); }
+}
+.logo-icon svg { width: 18px; height: 18px; fill: var(--cyan); }
+.logo-text {
+  font-family: var(--font-head);
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: var(--cyan);
+  text-shadow: 0 0 20px rgba(0,212,255,0.5);
+}
+.logo-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 2px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 10px var(--green);
+  animation: blink 1.5s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+.status-dot.offline { background: var(--red); box-shadow: 0 0 10px var(--red); animation: none; }
+
+#clock {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--cyan);
+  letter-spacing: 2px;
+}
+.header-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text3);
+  letter-spacing: 1px;
+}
+
+/* ── LAYOUT ── */
+.layout {
+  display: grid;
+  grid-template-columns: 260px 1fr 320px;
+  grid-template-rows: auto 1fr auto;
+  gap: 0;
+  height: calc(100vh - 56px);
+}
+
+/* ── PANELS ── */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.panel-header {
+  padding: 10px 16px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.panel-title {
+  font-family: var(--font-head);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--cyan);
+  text-transform: uppercase;
+}
+.panel-badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text3);
+}
+
+/* ── STAT CARDS ── */
+.stats-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-bottom: 1px solid var(--border2);
+}
+.stat-card {
+  background: var(--bg2);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: background 0.2s;
+}
+.stat-card:hover { background: var(--bg3); }
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.stat-value {
+  font-family: var(--font-head);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  transition: color 0.3s;
+}
+.stat-value.cyan  { color: var(--cyan); }
+.stat-value.green { color: var(--green); }
+.stat-value.red   { color: var(--red); text-shadow: 0 0 12px rgba(255,51,102,0.4); }
+.stat-value.orange{ color: var(--orange); }
+.stat-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text3);
+}
+
+/* ── LEFT SIDEBAR ── */
+.sidebar-left {
+  grid-row: 2 / 4;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+/* Protocol Breakdown */
+.proto-bars { padding: 12px 14px; flex: 1; }
+.proto-item {
+  margin-bottom: 12px;
+}
+.proto-head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.proto-name {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text2);
+  text-transform: uppercase;
+}
+.proto-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--cyan);
+}
+.proto-bar-bg {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.proto-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--cyan2), var(--cyan));
+  transition: width 0.5s ease;
+  box-shadow: 0 0 6px var(--cyan);
+}
+
+/* Attack type breakdown */
+.attack-list { padding: 8px 14px; }
+.attack-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+.attack-item:last-child { border-bottom: none; }
+.attack-name {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text2);
+}
+.attack-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  background: rgba(255,51,102,0.15);
+  color: var(--red);
+  border: 1px solid rgba(255,51,102,0.3);
+}
+
+/* ── CENTER MAIN ── */
+.center {
+  grid-row: 2 / 4;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+/* Traffic table */
+.traffic-table-wrap {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+}
+.traffic-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.traffic-table th {
+  position: sticky; top: 0;
+  background: var(--bg2);
+  padding: 8px 10px;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border2);
+  z-index: 10;
+}
+.traffic-table td {
+  padding: 6px 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  border-bottom: 1px solid rgba(14,42,63,0.4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+.traffic-table tr {
+  transition: background 0.2s;
+  animation: row-in 0.3s ease;
+}
+@keyframes row-in {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.traffic-table tr:hover { background: rgba(0,212,255,0.04); }
+.traffic-table tr.attack { background: rgba(255,51,102,0.06); }
+.traffic-table tr.attack:hover { background: rgba(255,51,102,0.1); }
+
+.label-badge {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 2px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+.label-badge.normal {
+  background: rgba(0,255,136,0.1);
+  color: var(--green);
+  border: 1px solid rgba(0,255,136,0.3);
+}
+.label-badge.attack {
+  background: rgba(255,51,102,0.15);
+  color: var(--red);
+  border: 1px solid rgba(255,51,102,0.4);
+  text-shadow: 0 0 6px rgba(255,51,102,0.5);
+}
+.label-badge.unknown {
+  background: rgba(255,215,0,0.1);
+  color: var(--yellow);
+  border: 1px solid rgba(255,215,0,0.3);
+}
+
+/* Mini chart */
+.chart-area {
+  height: 100px;
+  background: var(--bg2);
+  position: relative;
+  overflow: hidden;
+}
+#miniChart {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── RIGHT SIDEBAR — ALERTS ── */
+.sidebar-right {
+  grid-row: 2 / 4;
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.alerts-list {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.alert-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--red);
+  border-radius: 4px;
+  padding: 10px 12px;
+  animation: alert-in 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  transition: border-color 0.2s;
+}
+.alert-card:hover { border-color: var(--red2); background: var(--bg3); }
+.alert-card.severity-HIGH  { border-left-color: var(--red); }
+.alert-card.severity-MEDIUM{ border-left-color: var(--orange); }
+.alert-card.severity-LOW   { border-left-color: var(--yellow); }
+@keyframes alert-in {
+  from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.alert-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 6px;
+}
+.alert-type {
+  font-family: var(--font-head);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--red);
+}
+.alert-card.severity-MEDIUM .alert-type { color: var(--orange); }
+.alert-card.severity-LOW .alert-type    { color: var(--yellow); }
+
+.alert-time {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text3);
+}
+.alert-ips {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text2);
+  margin-bottom: 4px;
+}
+.alert-ips span { color: var(--cyan); }
+.alert-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.alert-confidence {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text3);
+}
+.severity-pill {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+.severity-HIGH   .severity-pill { background: rgba(255,51,102,0.2); color: var(--red); border: 1px solid rgba(255,51,102,0.4); }
+.severity-MEDIUM .severity-pill { background: rgba(255,140,0,0.2); color: var(--orange); border: 1px solid rgba(255,140,0,0.4); }
+.severity-LOW    .severity-pill { background: rgba(255,215,0,0.2); color: var(--yellow); border: 1px solid rgba(255,215,0,0.4); }
+
+.no-alerts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 12px;
+  color: var(--text3);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+.no-alerts svg { opacity: 0.3; }
+
+/* ── SIMULATE BUTTON ── */
+.sim-btn {
+  margin: 8px;
+  padding: 10px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  color: var(--text3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+.sim-btn:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  background: rgba(0,212,255,0.05);
+  box-shadow: 0 0 12px rgba(0,212,255,0.1);
+}
+
+/* ── BOTTOM BAR ── */
+.bottom-bar {
+  grid-column: 1 / -1;
+  height: 28px;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 24px;
+}
+.bottom-item {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 1px;
+}
+.bottom-item span { color: var(--cyan); }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* ── FLASH ON NEW ALERT ── */
+@keyframes flash-bg {
+  0%   { background: rgba(255,51,102,0.12); }
+  100% { background: transparent; }
+}
+body.alert-flash::after {
+  content: '';
+  position: fixed; inset: 0;
+  border: 2px solid var(--red);
+  pointer-events: none;
+  z-index: 99998;
+  animation: border-flash 0.6s ease forwards;
+}
+@keyframes border-flash {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ── CONN COUNT SPARKLE ── */
+.sparkle { color: var(--cyan); animation: sparkle 0.4s ease; }
+@keyframes sparkle { 0%{transform:scale(1.4)} 100%{transform:scale(1)} }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <div>
+      <div class="logo-text">SENTINEL</div>
+      <div class="logo-sub">NETWORK INTRUSION DETECTION SYSTEM</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="header-label">SYSTEM STATUS</div>
+    <div class="status-dot" id="statusDot"></div>
+    <div id="clock">00:00:00</div>
+  </div>
+</header>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- STATS ROW -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Total Connections</div>
+      <div class="stat-value cyan" id="statTotal">0</div>
+      <div class="stat-sub">since startup</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Benign</div>
+      <div class="stat-value green" id="statBenign">0</div>
+      <div class="stat-sub" id="statBenignPct">0%</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Attacks Detected</div>
+      <div class="stat-value red" id="statAttacks">0</div>
+      <div class="stat-sub" id="statAttacksPct">0%</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Bytes IN</div>
+      <div class="stat-value cyan" id="statBytesIn">0 B</div>
+      <div class="stat-sub">received</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Bytes OUT</div>
+      <div class="stat-value cyan" id="statBytesOut">0 B</div>
+      <div class="stat-sub">sent</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Models</div>
+      <div class="stat-value orange" id="statModels">—</div>
+      <div class="stat-sub" id="statModelsLbl">checking…</div>
+    </div>
+  </div>
+
+  <!-- LEFT SIDEBAR -->
+  <div class="sidebar-left">
+    <!-- Protocols -->
+    <div class="panel" style="flex:1">
+      <div class="panel-header">
+        <div class="panel-title">Protocols</div>
+        <div class="panel-badge" id="protoTotal">0 pkts</div>
+      </div>
+      <div class="proto-bars" id="protoBars">
+        <div style="color:var(--text3);font-family:var(--font-mono);font-size:11px;padding:12px 0;text-align:center;letter-spacing:2px">AWAITING TRAFFIC</div>
+      </div>
+    </div>
+    <!-- Attack Types -->
+    <div class="panel" style="flex:1">
+      <div class="panel-header">
+        <div class="panel-title">Attack Types</div>
+        <div class="panel-badge" id="attackTypeTotal">0 detected</div>
+      </div>
+      <div class="attack-list" id="attackTypeList">
+        <div style="color:var(--text3);font-family:var(--font-mono);font-size:11px;padding:12px 0;text-align:center;letter-spacing:2px">NONE DETECTED</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER -->
+  <div class="center">
+    <!-- Mini timeline chart -->
+    <div class="chart-area panel">
+      <div class="panel-header" style="position:absolute;top:0;left:0;right:0;z-index:2;background:transparent;border:none;padding:6px 12px">
+        <div class="panel-title" style="font-size:9px">LIVE TRAFFIC TIMELINE</div>
+      </div>
+      <canvas id="miniChart"></canvas>
+    </div>
+    <!-- Traffic table -->
+    <div class="panel" style="flex:1;display:flex;flex-direction:column;">
+      <div class="panel-header">
+        <div class="panel-title">Live Connections</div>
+        <div class="panel-badge" id="connCount">0 records</div>
+      </div>
+      <div class="traffic-table-wrap">
+        <table class="traffic-table">
+          <thead>
+            <tr>
+              <th>TIME</th>
+              <th>SRC IP</th>
+              <th>DST IP</th>
+              <th>PROTO</th>
+              <th>SERVICE</th>
+              <th>BYTES↑</th>
+              <th>BYTES↓</th>
+              <th>LABEL</th>
+              <th>CONF%</th>
+            </tr>
+          </thead>
+          <tbody id="connTableBody">
+            <tr><td colspan="9" style="text-align:center;color:var(--text3);font-family:var(--font-mono);padding:24px;letter-spacing:2px">AWAITING DATA FROM ZEEK…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT SIDEBAR — ALERTS -->
+  <div class="sidebar-right">
+    <div class="panel-header">
+      <div class="panel-title">🚨 Threat Alerts</div>
+      <div class="panel-badge" id="alertCount">0 alerts</div>
+    </div>
+    <div class="alerts-list" id="alertsList">
+      <div class="no-alerts">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        NO THREATS DETECTED
+      </div>
+    </div>
+    <button class="sim-btn" onclick="simulate()">⚡ SIMULATE TRAFFIC</button>
+  </div>
+
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <div class="bottom-item">BACKEND: <span id="backendUrl">http://localhost:5050</span></div>
+  <div class="bottom-item">ZEEK LOG: <span id="zeekPath">C:\Program Files\Zeek\logs\current\conn.log</span></div>
+  <div class="bottom-item">SSE: <span id="sseStatus">CONNECTING…</span></div>
+  <div class="bottom-item">LAST UPDATE: <span id="lastUpdate">—</span></div>
+</div>
+
+<script>
+const API = 'http://localhost:5050';
+let connections = [];
+let alerts = [];
+let chartData = Array(60).fill(0);
+let animFrame;
+
+// ── CLOCK ──────────────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.toTimeString().slice(0,8);
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── FORMAT BYTES ───────────────────────────────────────────────
+function fmtBytes(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+  if (b < 1073741824) return (b/1048576).toFixed(1) + ' MB';
+  return (b/1073741824).toFixed(2) + ' GB';
+}
+
+// ── CANVAS CHART ───────────────────────────────────────────────
+const canvas = document.getElementById('miniChart');
+const ctx = canvas.getContext('2d');
+let chartConnPerSec = Array(80).fill(0);
+let chartAttackPerSec = Array(80).fill(0);
+
+function resizeCanvas() {
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function drawChart() {
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  // Background grid
+  ctx.strokeStyle = 'rgba(14,42,63,0.6)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 5; i++) {
+    const y = (H * i / 4) + 28;
+    if (y < H) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
+  }
+
+  const maxVal = Math.max(...chartConnPerSec, 1);
+  const segW = W / chartConnPerSec.length;
+
+  // Connection area fill
+  ctx.beginPath();
+  ctx.moveTo(0, H);
+  chartConnPerSec.forEach((v, i) => {
+    const x = i * segW;
+    const y = H - ((v / maxVal) * (H - 35)) - 2;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.lineTo(W, H); ctx.closePath();
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, 'rgba(0,212,255,0.25)');
+  grad.addColorStop(1, 'rgba(0,212,255,0.02)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Connection line
+  ctx.beginPath();
+  ctx.strokeStyle = 'rgba(0,212,255,0.8)';
+  ctx.lineWidth = 1.5;
+  chartConnPerSec.forEach((v, i) => {
+    const x = i * segW;
+    const y = H - ((v / maxVal) * (H - 35)) - 2;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // Attack bars
+  chartAttackPerSec.forEach((v, i) => {
+    if (v > 0) {
+      const x = i * segW;
+      const barH = Math.max(4, (v / maxVal) * (H - 35));
+      ctx.fillStyle = 'rgba(255,51,102,0.7)';
+      ctx.fillRect(x, H - barH - 2, Math.max(segW - 1, 2), barH);
+    }
+  });
+
+  requestAnimationFrame(drawChart);
+}
+drawChart();
+
+// ── STATUS POLL ────────────────────────────────────────────────
+let perSecBuffer = { conn: 0, attack: 0 };
+let lastSecTick = Date.now();
+
+function tickPerSec() {
+  chartConnPerSec.push(perSecBuffer.conn);
+  chartConnPerSec.shift();
+  chartAttackPerSec.push(perSecBuffer.attack);
+  chartAttackPerSec.shift();
+  perSecBuffer = { conn: 0, attack: 0 };
+}
+setInterval(tickPerSec, 1000);
+
+async function fetchStatus() {
+  try {
+    const r = await fetch(`${API}/api/status`);
+    const d = await r.json();
+
+    document.getElementById('statTotal').textContent = d.total.toLocaleString();
+    document.getElementById('statBenign').textContent = d.benign.toLocaleString();
+    document.getElementById('statAttacks').textContent = d.attacks.toLocaleString();
+    document.getElementById('statBytesIn').textContent = fmtBytes(d.bytes_in);
+    document.getElementById('statBytesOut').textContent = fmtBytes(d.bytes_out);
+
+    const pct = d.total > 0 ? Math.round(d.attacks / d.total * 100) : 0;
+    document.getElementById('statAttacksPct').textContent = pct + '% of traffic';
+    document.getElementById('statBenignPct').textContent = (100 - pct) + '% of traffic';
+
+    document.getElementById('statModels').textContent = d.models_loaded ? 'ACTIVE' : 'ERROR';
+    document.getElementById('statModelsLbl').textContent = d.models_loaded ? 'RF Binary + Multi' : 'not loaded';
+
+    document.getElementById('statusDot').className = 'status-dot' + (d.running ? '' : ' offline');
+
+    // Protocols
+    updateProtocols(d.protocols, d.total);
+    updateAttackTypes(d.attack_types, d.attacks);
+
+    document.getElementById('lastUpdate').textContent = new Date().toTimeString().slice(0,8);
+  } catch(e) {
+    document.getElementById('statusDot').className = 'status-dot offline';
+    document.getElementById('sseStatus').textContent = 'BACKEND OFFLINE';
+  }
+}
+setInterval(fetchStatus, 3000);
+fetchStatus();
+
+// ── PROTOCOLS ─────────────────────────────────────────────────
+function updateProtocols(protocols, total) {
+  const container = document.getElementById('protoBars');
+  const entries = Object.entries(protocols).sort((a,b) => b[1] - a[1]).slice(0,6);
+  if (entries.length === 0) return;
+
+  const maxCount = Math.max(...entries.map(e => e[1]), 1);
+  container.innerHTML = entries.map(([proto, count]) => `
+    <div class="proto-item">
+      <div class="proto-head">
+        <span class="proto-name">${proto}</span>
+        <span class="proto-count">${count.toLocaleString()}</span>
+      </div>
+      <div class="proto-bar-bg">
+        <div class="proto-bar-fill" style="width:${Math.round(count/maxCount*100)}%"></div>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('protoTotal').textContent = total.toLocaleString() + ' total';
+}
+
+// ── ATTACK TYPES ──────────────────────────────────────────────
+function updateAttackTypes(types, total) {
+  const container = document.getElementById('attackTypeList');
+  const entries = Object.entries(types).sort((a,b) => b[1] - a[1]).slice(0,8);
+  if (entries.length === 0) return;
+
+  container.innerHTML = entries.map(([type, count]) => `
+    <div class="attack-item">
+      <span class="attack-name">${type}</span>
+      <span class="attack-badge">${count}</span>
+    </div>
+  `).join('');
+  document.getElementById('attackTypeTotal').textContent = total + ' detected';
+}
+
+// ── CONNECTIONS TABLE ─────────────────────────────────────────
+function renderConnRow(c) {
+  const isAttack = c.label === 'ATTACK';
+  const labelClass = isAttack ? 'attack' : (c.label === 'NORMAL' ? 'normal' : 'unknown');
+  return `<tr class="${isAttack ? 'attack' : ''}">
+    <td style="color:var(--text3)">${c.time}</td>
+    <td style="color:var(--cyan)">${c.src_ip}</td>
+    <td style="color:var(--text2)">${c.dst_ip}</td>
+    <td style="color:var(--text2);text-transform:uppercase">${c.proto}</td>
+    <td style="color:var(--text3)">${c.service || '-'}</td>
+    <td style="color:var(--text2)">${fmtBytes(c.orig_bytes)}</td>
+    <td style="color:var(--text2)">${fmtBytes(c.resp_bytes)}</td>
+    <td><span class="label-badge ${labelClass}">${c.label}</span></td>
+    <td style="color:${isAttack ? 'var(--red)' : 'var(--text3)'}">${c.confidence}%</td>
+  </tr>`;
+}
+
+// ── ALERTS ────────────────────────────────────────────────────
+function renderAlert(a) {
+  return `<div class="alert-card severity-${a.severity}">
+    <div class="alert-top">
+      <div class="alert-type">⚠ ${a.attack_type}</div>
+      <div class="alert-time">${a.time}</div>
+    </div>
+    <div class="alert-ips"><span>${a.src_ip}</span> → <span>${a.dst_ip}</span></div>
+    <div class="alert-bottom">
+      <span class="alert-confidence">CONF: ${a.confidence}% · ${a.proto.toUpperCase()}</span>
+      <span class="severity-pill">${a.severity}</span>
+    </div>
+  </div>`;
+}
+
+// ── SSE STREAM ────────────────────────────────────────────────
+let connRows = [];
+const MAX_TABLE_ROWS = 80;
+
+function connectSSE() {
+  const es = new EventSource(`${API}/api/stream`);
+  document.getElementById('sseStatus').textContent = 'CONNECTING…';
+
+  es.addEventListener('connection', e => {
+    const c = JSON.parse(e.data);
+    connRows.unshift(c);
+    if (connRows.length > MAX_TABLE_ROWS) connRows.pop();
+
+    const tbody = document.getElementById('connTableBody');
+    tbody.innerHTML = connRows.map(renderConnRow).join('');
+    document.getElementById('connCount').textContent = connRows.length + ' records';
+
+    perSecBuffer.conn++;
+    if (c.label === 'ATTACK') perSecBuffer.attack++;
+  });
+
+  es.addEventListener('alert', e => {
+    const a = JSON.parse(e.data);
+    const list = document.getElementById('alertsList');
+
+    // Flash border
+    document.body.classList.add('alert-flash');
+    setTimeout(() => document.body.classList.remove('alert-flash'), 700);
+
+    // Remove empty state
+    const empty = list.querySelector('.no-alerts');
+    if (empty) empty.remove();
+
+    list.insertAdjacentHTML('afterbegin', renderAlert(a));
+
+    // Cap alert list
+    const cards = list.querySelectorAll('.alert-card');
+    if (cards.length > 40) cards[cards.length - 1].remove();
+
+    const count = list.querySelectorAll('.alert-card').length;
+    document.getElementById('alertCount').textContent = count + ' alerts';
+  });
+
+  es.onopen = () => {
+    document.getElementById('sseStatus').textContent = 'LIVE ●';
+    document.getElementById('sseStatus').style.color = 'var(--green)';
+  };
+  es.onerror = () => {
+    document.getElementById('sseStatus').textContent = 'RECONNECTING…';
+    document.getElementById('sseStatus').style.color = 'var(--orange)';
+    es.close();
+    setTimeout(connectSSE, 3000);
+  };
+}
+connectSSE();
+
+// ── INITIAL LOAD ──────────────────────────────────────────────
+async function loadInitial() {
+  try {
+    const [cR, aR] = await Promise.all([
+      fetch(`${API}/api/connections`),
+      fetch(`${API}/api/alerts`)
+    ]);
+    const conns  = await cR.json();
+    const alrts  = await aR.json();
+
+    connRows = conns;
+    document.getElementById('connTableBody').innerHTML =
+      conns.length ? conns.map(renderConnRow).join('') :
+      '<tr><td colspan="9" style="text-align:center;color:var(--text3);font-family:var(--font-mono);padding:24px;letter-spacing:2px">AWAITING DATA FROM ZEEK…</td></tr>';
+    document.getElementById('connCount').textContent = conns.length + ' records';
+
+    if (alrts.length) {
+      const list = document.getElementById('alertsList');
+      list.innerHTML = alrts.map(renderAlert).join('');
+      document.getElementById('alertCount').textContent = alrts.length + ' alerts';
+    }
+  } catch(e) {
+    console.log('Initial load failed — backend may not be running yet');
+  }
+}
+loadInitial();
+
+// ── SIMULATE ──────────────────────────────────────────────────
+async function simulate() {
+  try {
+    await fetch(`${API}/api/simulate`, { method: 'POST' });
+  } catch(e) {
+    alert('Backend not running!\n\nStart it with:\n  python backend.py');
+  }
+}
+</script>
+</body>
+</html>
